@@ -12,15 +12,24 @@ function checkFileInfo(filename) {
           console.log(filename + 
             ' was created on ' + 
             exif.exif.CreateDate.toString());
-            
-          // Move the file to a directory
-          fs.rename(filename,
-                    exif.exif.CreateDate.toString() + '\\' +
-                    filename,
-                    function(err) {
-                      if(err)
-                        console.log(err);
-                    });
+          
+          fs.mkdir(exif.exif.CreateDate.toString(),
+                  null,
+                  function(err) {
+                    
+                    if(err)
+                      console.log(err);
+                    else {
+                      // Move the file to a directory
+                      fs.rename(filename,
+                        exif.exif.CreateDate.toString() + '//' +
+                        filename,
+                        function(err) {
+                          if(err)
+                            console.log(err);
+                        }); // End rename  
+                    } // End else (no error)
+                  }); // End mkdir
             
         } // End if not an error
       }); // End image creation
