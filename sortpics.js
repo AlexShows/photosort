@@ -1,12 +1,18 @@
 /* Sort some photos using the exif module */
 var img = require('exif').ExifImage;
 var fs = require('fs');
+var mkdirp = require('mkdirp');
+const path = require('path');
 
-function checkFileInfo(filename) {
+function checkFileInfo(pathname, filename) {
   
-  fs.stat(filename, function(err, stats) {
+  fs.stat(pathname + path.sep + filename, function(err, stats) {
+    if(err){
+        console.log(err);
+        return;
+    }
     if(!stats.isDirectory()) {
-      new img({ image : filename }, function(err, exif) {
+      new img({ image : pathname + path.sep + filename }, function(err, exif) {
         if(!err) {
           
           var fileCreatedDate = exif.exif.CreateDate.toString();
@@ -20,57 +26,66 @@ function checkFileInfo(filename) {
           var month = fileCreatedDate.substring(5,7);
           var day = fileCreatedDate.substring(8,10);
           
-          console.log('This directory ' + 
-                      year + '/' + 
-                      month + '/' + 
+/*          console.log('This directory ' + 
+                      year + path.sep + 
+                      month + path.sep + 
                       day);
-          
-          fs.mkdir(year,
-                  null,
+*/          
+          mkdirp(pathname + path.sep + year + path.sep + month + path.sep + day, 0777,
                   function(err) {
                     
                     if(err)
                       console.log(err);
                     
-                    // Create the next directory down
-                    fs.mkdir(year + '/' + month,
-                            null,
-                            function(err) {
-                      
-                      if(err)
-                        console.log(err);
-                        
-                      // Create the next directory down
-                      fs.mkdir(year + '/' + month + '/' + day,
-                              null,
-                              function(err) {
+                    console.log('Source: ' + pathname + path.sep + filename);
+                    console.log('Destination: ' +
+                                pathname + path.sep + 
+                                year + path.sep + 
+                                month + path.sep + 
+                                day + path.sep + 
+                                filename);
+              
+                    // Move the file to a directory
+                    fs.rename(pathname + path.sep + filename,
+                      pathname + path.sep + 
+                              year + path.sep + 
+                              month + path.sep + 
+                              day + path.sep +
+                      filename,
+                      function(err) {
                         if(err)
                           console.log(err);
-                        
-                        // Move the file to a directory
-                        fs.rename(filename,
-                          year + '/' + month + '/' + day + '/' +
-                          filename,
-                          function(err) {
-                            if(err)
-                              console.log(err);
-                        }); // End rename  
-                        
-                      }); // End mkdir (day)
-                    }); // End mkdir (month)
-                  }); // End mkdir (year)
-        } // End if not an error
-      }); // End image creation
+                    }); // End rename  
+          }); // End mkdirp
+        } // End if no error in exif img creation
+      }); // End if img creation
     } // End if it's not a directory
   }); // End stat on the filename
 } // End checkFileInfo
 
-fs.readdir('./', function(err, dirlisting) {
+var targetDirectory = './'
+if(process.argv[2]) {
+    targetDirectory = targetDirectory + process.argv[2] + path.sep;
+    
+    fs.readdir(targetDirectory, function(err, dirlisting) {
 
-  for(var f in dirlisting) {
-  
-    //console.log('In the for loop I see '+ dirlisting[f]);
-    checkFileInfo(dirlisting[f]);
-  } // end for each file name
+      for(var f in dirlisting) {
 
-});
+        //console.log('In the for loop I see '+ dirlisting[f]);
+        checkFileInfo(process.argv[2], dirlisting[f]);
+      } // end for each file name
+
+    });
+} else { 
+    fs.readdir(targetDirectory, function(err, dirlisting) {
+
+      for(var f in dirlisting) {
+
+        //console.log('In the for loop I see '+ dirlisting[f]);
+        checkFileInfo(dirlisting[f]);
+      } // end for each file name
+
+    });
+}
+
+
