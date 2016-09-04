@@ -31,17 +31,33 @@ function checkFileInfo(pathname, filename) {
                     if(err)
                       console.log(err);
                     
-					// Move the file to a directory
-                    fs.rename(pathname + path.sep + filename,
-                      pathname + path.sep + 
-                              year + path.sep + 
-                              month + path.sep + 
-                              day + path.sep +
-                      filename,
-                      function(err) {
-                        if(err)
-                          console.log(err);
-                    }); // End rename  
+					// Check if the file exists, and if it does, 
+					// preppend three random characters
+					fs.stat(pathname + path.sep + year + path.sep + 
+								month + path.sep + 
+								day + path.sep + filename, function(err, stat) {
+						if(err == null) {
+							// Uh oh, file exists, so prepend some characters
+							// TODO: Decide how to handle this case.
+							// Adding random characters may make this hard to track if searching
+							// So it may be better to prepend 3 random characters plus 3 pre-
+							// determined characters, thus those 3 could be searched easily
+							console.log('WARNING: File exists. Aborting the move for file: '
+								+ filename);
+						} else if(err.code == 'ENOENT'){
+							// Move the file to the directory
+		                    fs.rename(pathname + path.sep + filename,
+                		      pathname + path.sep + 
+        		                      year + path.sep + 
+		                              month + path.sep + 
+        		                      day + path.sep +
+				                      filename,
+                		      function(err) {
+        		                if(err)
+		                          console.log(err);
+                    		}); // End rename 
+						} // End else file does not already exist
+					});
           }); // End mkdirp
         } // End if no error in exif img creation
       }); // End if img creation
