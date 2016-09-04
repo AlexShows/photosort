@@ -6,8 +6,6 @@ const path = require('path');
 
 function checkFileInfo(pathname, filename) {
 
-	console.log('In checkFileInfo and pathname is ' + pathname);  
-
   fs.stat(pathname + path.sep + filename, function(err, stats) {
     if(err){
         console.log(err);
@@ -17,37 +15,23 @@ function checkFileInfo(pathname, filename) {
       new img({ image : pathname + path.sep + filename }, function(err, exif) {
         if(!err) {
           
+			if(exif.exif.CreateDate == undefined)
+				return;			
+
           var fileCreatedDate = exif.exif.CreateDate.toString();
-          
-          console.log(filename + 
-            ' was created on ' + 
-            fileCreatedDate);
           
           // Extract year, month, day from CreateDate
           var year = fileCreatedDate.substring(0,4);
           var month = fileCreatedDate.substring(5,7);
           var day = fileCreatedDate.substring(8,10);
           
-/*          console.log('This directory ' + 
-                      year + path.sep + 
-                      month + path.sep + 
-                      day);
-*/          
           mkdirp(pathname + path.sep + year + path.sep + month + path.sep + day, 0777,
                   function(err) {
                     
                     if(err)
                       console.log(err);
                     
-                    console.log('Source: ' + pathname + path.sep + filename);
-                    console.log('Destination: ' +
-                                pathname + path.sep + 
-                                year + path.sep + 
-                                month + path.sep + 
-                                day + path.sep + 
-                                filename);
-              
-                    // Move the file to a directory
+					// Move the file to a directory
                     fs.rename(pathname + path.sep + filename,
                       pathname + path.sep + 
                               year + path.sep + 
@@ -65,29 +49,18 @@ function checkFileInfo(pathname, filename) {
   }); // End stat on the filename
 } // End checkFileInfo
 
-var targetDirectory = './'
-if(process.argv[2] != undefined) {
-    targetDirectory = targetDirectory + process.argv[2] + path.sep;
-    
-    fs.readdir(targetDirectory, function(err, dirlisting) {
+// If the user passed a directory on the command line, use it
+// Otherwise, use the current working directory
+var targetDirectory = '';
+if(process.argv[2] != undefined)
+	targetDirectory = process.argv[2];
+else
+	targetDirectory = './';
 
-      for(var f in dirlisting) {
-
-        //console.log('In the for loop I see '+ dirlisting[f]);
-        checkFileInfo(process.argv[2], dirlisting[f]);
-      } // end for each file name
-
-    });
-} else { 
-    fs.readdir(targetDirectory, function(err, dirlisting) {
-
-      for(var f in dirlisting) {
-
-        //console.log('In the for loop I see '+ dirlisting[f]);
-        checkFileInfo(targetDirectory, dirlisting[f]);
-      } // end for each file name
-
-    });
-}
-
+fs.readdir(targetDirectory, function(err, dirlisting) {
+	
+	for(var f in dirlisting) {
+		checkFileInfo(targetDirectory, dirlisting[f]);
+	} // end for each file name
+});
 
