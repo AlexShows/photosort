@@ -5,7 +5,9 @@ var mkdirp = require('mkdirp');
 const path = require('path');
 
 function checkFileInfo(pathname, filename) {
-  
+
+	console.log('In checkFileInfo and pathname is ' + pathname);  
+
   fs.stat(pathname + path.sep + filename, function(err, stats) {
     if(err){
         console.log(err);
@@ -64,7 +66,7 @@ function checkFileInfo(pathname, filename) {
 } // End checkFileInfo
 
 var targetDirectory = './'
-if(process.argv[2]) {
+if(process.argv[2] != undefined) {
     targetDirectory = targetDirectory + process.argv[2] + path.sep;
     
     fs.readdir(targetDirectory, function(err, dirlisting) {
@@ -82,7 +84,7 @@ if(process.argv[2]) {
       for(var f in dirlisting) {
 
         //console.log('In the for loop I see '+ dirlisting[f]);
-        checkFileInfo(dirlisting[f]);
+        checkFileInfo(targetDirectory, dirlisting[f]);
       } // end for each file name
 
     });
