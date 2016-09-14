@@ -15,7 +15,7 @@ function checkFileInfo(pathname, filename) {
       new img({ image : pathname + path.sep + filename }, function(err, exif) {
         if(!err) {
           
-			if(exif.exif.CreateDate == undefined)
+			if(exif.exif.CreateDate === undefined)
 				return;			
 
           var fileCreatedDate = exif.exif.CreateDate.toString();
@@ -36,26 +36,21 @@ function checkFileInfo(pathname, filename) {
 					fs.stat(pathname + path.sep + year + path.sep + 
 								month + path.sep + 
 								day + path.sep + filename, function(err, stat) {
-						if(err == null) {
-							// Uh oh, file exists, so prepend some characters
-							// TODO: Decide how to handle this case.
-							// Adding random characters may make this hard to track if searching
-							// So it may be better to prepend 3 random characters plus 3 pre-
-							// determined characters, thus those 3 could be searched easily
-							console.log('WARNING: File exists. Aborting the move for file: '
-								+ filename);
+						if(err === null) {
+							// Uh oh, file exists...do nothing
+							console.log('File exists. Possible duplicate: ' + filename);
 						} else if(err.code == 'ENOENT'){
 							// Move the file to the directory
-		                    fs.rename(pathname + path.sep + filename,
-                		      pathname + path.sep + 
-        		                      year + path.sep + 
-		                              month + path.sep + 
-        		                      day + path.sep +
-				                      filename,
-                		      function(err) {
-        		                if(err)
-		                          console.log(err);
-                    		}); // End rename 
+              fs.rename(pathname + path.sep + filename,
+      		      pathname + path.sep + 
+	                      year + path.sep + 
+                        month + path.sep + 
+	                      day + path.sep +
+                    filename,
+      		      function(err) {
+	                if(err)
+                    console.log(err);
+          		}); // End rename 
 						} // End else file does not already exist
 					});
           }); // End mkdirp
@@ -68,7 +63,7 @@ function checkFileInfo(pathname, filename) {
 // If the user passed a directory on the command line, use it
 // Otherwise, use the current working directory
 var targetDirectory = '';
-if(process.argv[2] != undefined)
+if(process.argv[2] !== undefined)
 	targetDirectory = process.argv[2];
 else
 	targetDirectory = './';
