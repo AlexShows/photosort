@@ -31,8 +31,7 @@ function checkFileInfo(pathname, filename) {
                     if(err)
                       console.log(err);
                     
-					// Check if the file exists, and if it does, 
-					// preppend three random characters
+					// Check if the file exists
 					fs.stat(pathname + path.sep + year + path.sep + 
 								month + path.sep + 
 								day + path.sep + filename, function(err, stat) {
